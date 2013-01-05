@@ -165,29 +165,32 @@ class Rivets.View
         for attribute in attributes or node.attributes
           if bindingRegExp.test attribute.name
             options = {}
+            
+            multiples = attribute.value.split ','
+            for multiple in multiples
+              multiple = multiple.trim()
+              type = attribute.name.replace bindingRegExp, ''
+              pipes = (pipe.trim() for pipe in multiple.split '|')
+              context = (ctx.trim() for ctx in pipes.shift().split '<')
+              path = context.shift()
+              splitPath = path.split /\.|:/
+              options.formatters = pipes
+              options.bypass = path.indexOf(':') != -1
+              if splitPath[0]
+                model = @models[splitPath.shift()]
+              else
+                model = @models
+                splitPath.shift()
+              keypath = splitPath.join '.'
 
-            type = attribute.name.replace bindingRegExp, ''
-            pipes = (pipe.trim() for pipe in attribute.value.split '|')
-            context = (ctx.trim() for ctx in pipes.shift().split '<')
-            path = context.shift()
-            splitPath = path.split /\.|:/
-            options.formatters = pipes
-            options.bypass = path.indexOf(':') != -1
-            if splitPath[0]
-              model = @models[splitPath.shift()]
-            else
-              model = @models
-              splitPath.shift()
-            keypath = splitPath.join '.'
+              if model
+                if dependencies = context.shift()
+                  options.dependencies = dependencies.split /\s+/
 
-            if model
-              if dependencies = context.shift()
-                options.dependencies = dependencies.split /\s+/
+                binding = new Rivets.Binding node, type, model, keypath, options
+                binding.view = @
 
-              binding = new Rivets.Binding node, type, model, keypath, options
-              binding.view = @
-
-              @bindings.push binding
+                @bindings.push binding
 
         attributes = null if attributes
 
