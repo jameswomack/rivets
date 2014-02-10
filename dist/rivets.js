@@ -687,7 +687,7 @@
             sibling = nextSibling;
           }
           keypath = Rivets.Util.unescapeHTML(match[1]);
-          revived = document.createTextNode('{' + keypath + '}');
+          revived = document.createTextNode(Rivets.config.templateDelimiters[0] + keypath + Rivets.config.templateDelimiters[1]);
           el.parentNode.insertBefore(revived, el.nextSibling);
           el.parentNode.removeChild(el);
           return revived;
